@@ -5,15 +5,15 @@ P2
 optimization:
 - change chamber into coords, therefor less memory to store and compute through
 - change left,right,down to cycle through _chamber not the _pit
-- look for the higest from 0 not len()
 - change pit into integers
 - remove Rock object
 - replace integers in pit for booleans
+- rewrite for/if to oneliners (they are more efficient)(sometimes)
+- change the use of len because it takes a long time
+- Instead of recalculating the highest point in the pit after each rock falls, update it only when a new highest is reached
+    Try to do it by combining "transfer chamber to pit" and "find the highest" (solution: change the concept of the highest to calculate emptiness, not fullness)
 
-1) rewrite for/if to oneliners (they are more efficient)
-1) Instead of recalculating the highest point in the pit after each rock falls, update it only when a new highest is reached
-    Try to do it by combining "transfer chamber to pit" and "find the highest"
-2) implement pit reduction
+1) implement pit reduction
 """
 import time
 timer = time.time()
@@ -35,9 +35,9 @@ def right(_chamber, _pit):
         
     return True
 
-def down(_chamber, _pit):
+def down(_chamber, _pit, _depth):
     for x,y in _chamber:
-        if y+1 >= len(_pit):
+        if y+1 >= _depth:
             return False
         if _pit[y+1][x]:
             return False
@@ -45,7 +45,7 @@ def down(_chamber, _pit):
     return True
 
 def spawn_rock(xy):
-    return [2+xy[0],len(pit)-1-highest-3-xy[1]]
+    return [2+xy[0],highest-3-xy[1]]
 
 rocks = []
 rocks.append([[0,0],[1,0],[2,0],[3,0]]) # Line
@@ -56,10 +56,13 @@ rocks.append([[0,0],[1,0],[0,1],[1,1]]) # Cube
 
 chamber = [] # for falling rock coords
 pit = [] # for staic rocks
-highest = len(pit)-1 # from top
-while len(pit)-highest <= 6:
-    pit.insert(0,[False,False,False,False,False,False,False])
+highest = 0 # highest from top
+depth = 0 #lenght of pit so it doesn't need to be calculated
 
+for i in range(6-highest):
+    pit.insert(0,[False,False,False,False,False,False,False])
+    depth += 1
+    
 instruction = ""
 with open("2022\\17\\input.txt","r") as f:
     instruction = f.readline().strip()
@@ -70,11 +73,10 @@ rock_count = 0
 l_i = len(instruction)
 l_r = len(rocks)
 spawn = False
-r = 2022#1000000000000 #2022
+r = 1000000000000 #2022
 
 # only first rock spawn 
 highest = len(pit)-1
-
 for x,y in rocks[rock_pos]:
     chamber.append([2+x,highest-3-y])
 
@@ -92,16 +94,15 @@ while rock_count <= r:
         # transfer chamber to pit
         for x,y in chamber:
             pit[y][x] = True
-          
-        # find the highest
-        for i,level in enumerate(pit):
-            if True in level:
-                highest = len(pit)-i
-                break
+            # find if it is highest
+            if y-1 < highest:
+                highest = y-1
         
         # pit expansion
-        while len(pit)-highest <= 6:
+        for i in range(6-highest):
             pit.insert(0,[False,False,False,False,False,False,False])
+            highest +=1
+            depth += 1
 
         # spawn a rock into chamber
         chamber = list(map(spawn_rock,rocks[rock_pos]))
@@ -110,7 +111,14 @@ while rock_count <= r:
         rock_pos += 1
         rock_count += 1
         spawn = False
-
+        """
+        for i in pit:
+            for j in i:
+                if j:
+                    print(1,end=" ")
+                else:
+                    print(0,end=" ")
+            print()"""
     # movement based on instruction
     if instruction[ins_pos] == "<" and left(chamber,pit):
         for pos in chamber:
@@ -121,7 +129,7 @@ while rock_count <= r:
     ins_pos += 1
 
     # movement down
-    if down(chamber,pit):
+    if down(chamber,pit,depth):
         for pos in chamber:
             pos[1] += 1
 
@@ -131,15 +139,6 @@ while rock_count <= r:
 
 for i,level in enumerate(pit):
     if True in level:
-        print("Highest point in the pit:", len(pit)-i)
+        print("Highest point in the pit:", depth-i)
         break
 print(time.time()-timer)
-"""
-with open("2022\\17\\out.txt","w") as f:
-    for line in pit:
-        for p in line:
-            if p:
-                f.write("1")
-            else:
-                f.write("0")
-        f.write("\n")"""
