@@ -17,7 +17,6 @@ p2
 start from any a square switch will result to the shortest path
 """
 import numpy as np
-from scipy import sparse
 
 # find the reachable neighbors in the grid
 def reachable_neighbors(grid, y, x):
@@ -67,14 +66,13 @@ def solve(part):
             neighbors = reachable_neighbors(grid, y, x)
             np.put(adj_matrix[y*grid.shape[1] + x], neighbors, 1)
 
-    # convert the adjacency matrix and target matrix to compressed sparse row (CSR)
-    trgt_matrix = sparse.csr_matrix(adj_matrix)
-    adj_matrix = sparse.csr_matrix(adj_matrix)
+    # doing first step by creating target matrix
+    trgt_matrix = np.array(list(adj_matrix))
     steps = 1
 
     # iterate through matrix multiplication until the element at (start_coord, end_coord) in the target matrix becomes non-zero for all entries
     # update the target matrix with the matrix multiplication result and increment the steps
-    while (trgt_matrix.toarray()[start_coord, end_coord] == 0).all():
+    while (trgt_matrix[start_coord, end_coord] == 0).all():
         trgt_matrix = trgt_matrix @ adj_matrix
         steps += 1
 
