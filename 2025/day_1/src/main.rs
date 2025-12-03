@@ -73,9 +73,9 @@ fn main() {
     let input = txt_reader("input.txt");
     let lines: Vec<String> = input.unwrap_or_default();
 
-    // P1 count how many times dail lands on 0    
+    // P1: count how many times dail lands on 0    
     println!("Part 1 answer: {}", part_1(&lines));
 
-    // P2 count how many times dail lands or passes 0
+    // P2: count how many times dail lands or passes 0
     println!("Part 2 answer: {}", part_2(&lines));
 }
