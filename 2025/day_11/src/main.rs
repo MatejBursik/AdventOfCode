@@ -108,6 +108,6 @@ fn main() {
     // P1: count how many different paths lead from 'you' to 'out'
     println!("Part 1 answer: {}", part_1(&lines));
 
-    // count how many different paths that from 'svr' to 'out' and pass through 'dac' and 'fft'
+    // P2: count how many different paths that from 'svr' to 'out' and pass through 'dac' and 'fft'
     println!("Part 2 answer: {}", part_2(&lines));
 }
